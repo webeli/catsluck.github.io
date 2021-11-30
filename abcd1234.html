@@ -470,7 +470,6 @@ async function showMyHistory() {
   var filter = {address: clkAddress, topics: [[Deposit, Withdraw], signerAddr32]}
   var toHeight = await provider.getBlockNumber()
   var logs = await getLogs(DefaultStartHeight, toHeight, provider, filter, 200)
-  console.log("logs", logs)
   showPoolOperations(logs)
 }
 
@@ -480,7 +479,10 @@ async function getLogs(startHeight, toHeight, provider, filter, countLimit) {
     filter.fromBlock = startHeight
     filter.toHeight = Math.min(startHeight+100000-1, toHeight)
     var logs = await provider.getLogs(filter)
+    //console.log("from to ", filter.fromBlock, filter.toHeight)
     for(var i=0; i<logs.length; i++) {
+      if(logs[i].blockNumber > filter.toHeight) continue
+      //console.log("now i ", i, logs[i])
       allLogs.unshift(logs[i])
     }
     if(allLogs.length > countLimit) {
@@ -502,7 +504,6 @@ function showPoolOperations(logs) {
     const timeStr = formatTime(1000*timestamp.toNumber())
     if(log.topics[0] == Deposit || log.topics[0] == Withdraw) {
       var html = `<tr><td>${timeStr}</td>`
-      console.log("data", log.data)
       const amountBN = ethers.BigNumber.from(log.data.substr(0, 2+24))
       const amount  = ethers.utils.formatUnits(amountBN, CatsDecimal)
       const shareBN = ethers.BigNumber.from("0x"+log.data.substr(2+24, 24))
@@ -599,10 +600,10 @@ $(function() { //document.onload
     const provider = new ethers.providers.Web3Provider(window.ethereum)
     const signer = provider.getSigner()
     const signerAddr = await signer.getAddress()
-    $("#signerAddr").text(signerAddr)
     const roContract = new ethers.Contract(clkAddress, ReadonlyABI, provider).connect(signer)
     await getInfo(roContract, signerAddr)
     await syncValues(false)
+
     await showMyHistory()
     $(this).prop('disabled', false)
   });
