@@ -498,7 +498,7 @@ function showPoolOperations(logs) {
   poolTable.show()
   poolTable.html(`<tr><th>Time</th><th>$CATS</th><th>txid</th></tr>`)
   var totalInvest = 0
-  for(var i=0; i<logs.length; i++) {
+  for(var i=0; i<logs.length && i<200; i++) {
     var log = logs[i]
     const timestamp = ethers.BigNumber.from("0x"+log.data.substr(2+24+24))
     const timeStr = formatTime(1000*timestamp.toNumber())
@@ -546,7 +546,8 @@ async function showHistoryTable(startHeight, toHeight, provider) {
   }
   var logs = await getLogs(startHeight, toHeight, provider, filter, 200)
   var hisTblHead = $("#hisTblHead")
-  for(var i=logs.length-1; i>=0; i--) {
+  var start = Math.min(logs.length-1, 200)
+  for(var i=start; i>=0; i--) {
     var log = logs[i]
     const timestamp = ethers.BigNumber.from("0x"+log.data.substr(2+24+24))
     const timeStr = formatTime(1000*timestamp.toNumber())
@@ -676,6 +677,8 @@ $(function() { //document.onload
     <p>CLK is catsluck's exclusive token. CLK does not set a fixed upper limit. Before <span id="mintEndTime" style="font-weight: bold"></span>, users will get 1 free CLK every time he bets 1 $CATS. After that, the total amount of CLK does not increase. Till now, totally <span id="clkSupply" style="font-weight: bold">--</span> CLK have been minted. Please let your wallet <a href="javascript:" onclick="return watchCLK();">watch CLK</a>.</p>
     <p><b>Does the development team reserve CLK?</b></p>
     <p>Not at all. Absolutely fair distribution.</p>
+    <p><b>Where to trade CLK?</b></p>
+    <p><a target="_blank" href="https://dex.benswap.cash/#/swap?outputCurrency=0x659F04F36e90143fCaC202D4BC36C699C078fC98&inputCurrency=0x265bD28d79400D55a1665707Fa14A72978FA6043">CLK/$CATS</a> trading pair on benswap.</p>
     <p><b>What is house edge?</b></p>
     <p>The house edge is 2%.</p>
     <p>1% is allocated to reward pool and another 1% is used to buy back CLK in circulation. Currently, there have been <span id="buybackPoolTokenCount" style="font-weight: bold">--</span> $CATS accumulated for buyback, which equals about <span id="CLKcanBeBought" style="font-weight: bold">--</span> CLK. Anyone can <a href="javascript:" onclick="return buybackAndBurn();">send a transaction</a> to buy CLK with these $CATS and burn them. Till now, totally <span id="totalBurnt" style="font-weight: bold">--</span> CLK have been bought back and burnt.</p>
